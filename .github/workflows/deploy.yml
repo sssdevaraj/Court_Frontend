@@ -1,7 +1,6 @@
 name: Deploy
 
-# Trigger the workflow on push and
-# pull request events on the main branch
+# Trigger the workflow on push and pull request events on the main branch
 on:
   push:
     branches: ["main"]
@@ -22,5 +21,11 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /court-frontend
+            # Navigate to your project folder on the VPS
+            cd ~/Court_Frontend
+            
+            # Make sure the deploy script is executable
+            chmod +x .scripts/deploy.sh
+            
+            # Run the deploy script
             ./.scripts/deploy.sh
