@@ -1,6 +1,5 @@
 name: Deploy
 
-# Trigger the workflow on push and pull request events on the main branch
 on:
   push:
     branches: ["main"]
@@ -11,23 +10,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout code
       - uses: actions/checkout@v3
 
-      # Step 2: Setup Node.js (to build React app)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # Step 3: Install dependencies and build React app
       - name: Build React App
-        working-directory: ./Court_Frontend
         run: |
           npm install
           npm run build
+        working-directory: Court_Frontend   # <-- remove ./ at start
 
-      # Step 4: Deploy to server via SSH
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
@@ -36,11 +31,6 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            # Navigate to your project folder on the VPS
             cd ~/Court_Frontend
-            
-            # Make sure the deploy script is executable
             chmod +x .scripts/deploy.sh
-            
-            # Run the deploy script
             ./.scripts/deploy.sh
