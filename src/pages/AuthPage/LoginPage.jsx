@@ -11,7 +11,7 @@ const LoginForm = ({ setIsLogin, handleAuth }) => {
         onSubmit={handleAuth}
         className="p-6 md:p-12 bg-white shadow-lg rounded-lg w-full max-w-md flex flex-col gap-4"
       >
-        <h1 className="text-3xl font-semibold text-center">Welcome </h1>
+        <h1 className="text-3xl font-semibold text-center">Welcome to jumangi </h1>
         <p className="text-sm text-gray-600 text-center">Login to continue</p>
 
         {/* username Input */}
