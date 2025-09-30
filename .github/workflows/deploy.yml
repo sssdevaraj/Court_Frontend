@@ -24,7 +24,7 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /home/ecourtmsg/htdocs/court_front
+            cd /home/ecourtmsg/htdocs/ecourtmsg.info
             chmod +x .scripts/deploy.sh
             ./.scripts/deploy.sh
  
