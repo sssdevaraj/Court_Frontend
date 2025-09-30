@@ -41,7 +41,6 @@ const CaseHistoryTable = () => {
   const user = JSON.parse(storedUser);
 
   const fetchCaseHistory = useCallback(async (page = 1, limit = 10, appliedFilters = {}) => {
-   
     setLoading(true);
     setError(null);
 
@@ -125,6 +124,52 @@ const CaseHistoryTable = () => {
         });
   };
 
+  const parseJSONField = (field) => {
+    if (!field) return "N/A";
+    try {
+      const parsed = JSON.parse(field);
+      
+      // Handle acts object specifically
+      if (typeof parsed === 'object' && parsed !== null) {
+        if (parsed.acts && parsed.sections) {
+          return `${parsed.acts}, Section ${parsed.sections}`;
+        }
+        // Handle array case
+        if (Array.isArray(parsed)) {
+          return parsed.join(", ") || "N/A";
+        }
+        // Handle other objects by stringifying their values
+        return Object.values(parsed).filter(val => val).join(", ") || "N/A";
+      }
+      
+      return parsed || "N/A";
+    } catch {
+      return field || "N/A";
+    }
+  };
+
+  const formatActsAndSections = (actsField) => {
+    if (!actsField) return "N/A";
+    
+    try {
+      const parsed = JSON.parse(actsField);
+      if (typeof parsed === 'object' && parsed !== null) {
+        if (parsed.acts && parsed.sections) {
+          return (
+            <div>
+              <div><strong>Acts:</strong> {parsed.acts}</div>
+              <div><strong>Sections:</strong> {parsed.sections}</div>
+            </div>
+          );
+        }
+        return JSON.stringify(parsed);
+      }
+      return parsed;
+    } catch {
+      return actsField;
+    }
+  };
+
   const handleRowClick = (caseItem) => {
     setSelectedCase(caseItem);
   };
@@ -155,13 +200,28 @@ const CaseHistoryTable = () => {
                 <DetailItem label="Case Type" value={selectedCase.case_type || "N/A"} />
                 <DetailItem label="State" value={selectedCase.state} />
                 <DetailItem label="District" value={selectedCase.district || "N/A"} />
+                <DetailItem label="Court Complex" value={selectedCase.court_complex || "N/A"} />
+                <DetailItem label="Court Number and Judge" value={selectedCase.court_number_and_judge || "N/A"} />
+                <DetailItem label="Case Stage" value={selectedCase.case_stage || "N/A"} />
+                <DetailItem label="Filing Number" value={selectedCase.filing_number || "N/A"} />
+                <DetailItem label="Registration Date" value={formatDate(selectedCase.registration_date)} />
               </div>
 
               <div className="space-y-4">
-                <DetailItem label="Court Complex" value={selectedCase.court_complex || "N/A"} />
-                <DetailItem label="Petitioners" value={selectedCase.petitioners || "N/A"} />
-                <DetailItem label="Respondents" value={selectedCase.respondents || "N/A"} />
-                <DetailItem label="Respondent Advocates" value={selectedCase.respondent_advocates || "N/A"} />
+                <DetailItem label="Petitioners" value={parseJSONField(selectedCase.petitioners)} />
+                <DetailItem label="Petitioner Advocates" value={parseJSONField(selectedCase.petitioner_advocates)} />
+                <DetailItem label="Respondents" value={parseJSONField(selectedCase.respondents)} />
+                <DetailItem label="Respondent Advocates" value={parseJSONField(selectedCase.respondent_advocates)} />
+                <DetailItem label="Filing Date" value={formatDate(selectedCase.filing_date)} />
+                <DetailItem label="First Hearing Date" value={formatDate(selectedCase.first_hearing_date)} />
+                <DetailItem label="Decision Date" value={formatDate(selectedCase.decision_date)} />
+                <DetailItem label="Nature of Disposal" value={selectedCase.nature_of_disposal || "N/A"} />
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Acts and Sections</h3>
+                  <div className="mt-1 text-lg font-semibold text-gray-900">
+                    {formatActsAndSections(selectedCase.acts)}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -205,8 +265,28 @@ const CaseHistoryTable = () => {
                 placeholder="Enter CNR Number"
               />
             </div>
-       
-           
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Case Number</label>
+              <input
+                type="text"
+                name="case_number"
+                value={filters.case_number}
+                onChange={handleFilterChange}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2 border"
+                placeholder="Enter Case Number"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Party Name</label>
+              <input
+                type="text"
+                name="party_name"
+                value={filters.party_name}
+                onChange={handleFilterChange}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2 border"
+                placeholder="Enter Party Name"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
@@ -256,8 +336,9 @@ const CaseHistoryTable = () => {
                 <TableHead>CNR Number</TableHead>
                 <TableHead>Case Number/Year</TableHead>
                 <TableHead>Case Type</TableHead>
-                <TableHead>CourtNumber And Judge</TableHead>
-                <TableHead>Previous Date</TableHead>
+                <TableHead>Court Number and Judge</TableHead>
+                <TableHead>Filing Date</TableHead>
+                <TableHead>Registration Date</TableHead>
                 <TableHead>Court Complex</TableHead>
                 <TableHead>Stage of Case</TableHead>
                 <TableHead>Case Status</TableHead>
@@ -266,14 +347,14 @@ const CaseHistoryTable = () => {
                 <TableHead>Next Hearing Date</TableHead>
                 <TableHead>Petitioner and Advocate</TableHead>
                 <TableHead>Respondent and Advocate</TableHead>
-                <TableHead>Business</TableHead>
+                <TableHead>First Hearing Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={16} className="text-center py-4">
+                  <TableCell colSpan={17} className="text-center py-4">
                     Loading case history...
                   </TableCell>
                 </TableRow>
@@ -288,27 +369,37 @@ const CaseHistoryTable = () => {
                     <TableCell>{caseItem.cnr_number || "N/A"}</TableCell>
                     <TableCell>{caseItem.case_number || "N/A"}</TableCell>
                     <TableCell>{caseItem.case_type || "N/A"}</TableCell>
-                    <TableCell>{caseItem?.court_judge || "N/A"}</TableCell>
-                    <TableCell>{caseItem.previous_date || "N/A"}</TableCell>
+                    <TableCell>{caseItem.court_number_and_judge || "N/A"}</TableCell>
+                    <TableCell>{formatDate(caseItem.filing_date)}</TableCell>
+                    <TableCell>{formatDate(caseItem.registration_date)}</TableCell>
                     <TableCell>{caseItem.court_complex || "N/A"}</TableCell>
-                    <TableCell>{caseItem.stage_of_case || "N/A"}</TableCell>
-                    <TableCell>{caseItem.case_status || "N/A"}</TableCell>
+                    <TableCell>{caseItem.case_stage || "N/A"}</TableCell>
+                    <TableCell>
+                      {caseItem.is_approved ? "Approved" : "Pending"}
+                    </TableCell>
                     <TableCell>{caseItem.state || "N/A"}</TableCell>
                     <TableCell>{caseItem.district || "N/A"}</TableCell>
                     <TableCell>{formatDate(caseItem.next_date)}</TableCell>
-                    <TableCell>{caseItem.petitioners || "N/A"}</TableCell>
                     <TableCell>
-                      {caseItem.respondents || "N/A"}
-                      {caseItem.respondent_advocates && (
+                      <div>{parseJSONField(caseItem.petitioners)}</div>
+                      {caseItem.petitioner_advocates && (
                         <div className="text-xs text-gray-500">
-                          Advocate: {caseItem.respondent_advocates}
+                          Advocate: {parseJSONField(caseItem.petitioner_advocates)}
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>{caseItem.business || "N/A"}</TableCell>
+                    <TableCell>
+                      <div>{parseJSONField(caseItem.respondents)}</div>
+                      {caseItem.respondent_advocates && (
+                        <div className="text-xs text-gray-500">
+                          Advocate: {parseJSONField(caseItem.respondent_advocates)}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(caseItem.first_hearing_date)}</TableCell>
                     <TableCell>
                       <Eye
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRowClick(caseItem);
@@ -319,7 +410,7 @@ const CaseHistoryTable = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={16} className="text-center py-4">
+                  <TableCell colSpan={17} className="text-center py-4">
                     No case history found.
                   </TableCell>
                 </TableRow>
@@ -355,7 +446,7 @@ const CaseHistoryTable = () => {
 const DetailItem = ({ label, value }) => (
   <div>
     <h3 className="text-sm font-medium text-gray-500">{label}</h3>
-    <p className="mt-1 text-lg font-semibold text-gray-900">{value || "-"}</p>
+    <p className="mt-1 text-lg font-semibold text-gray-900">{value || "N/A"}</p>
   </div>
 );
 
