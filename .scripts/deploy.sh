@@ -13,7 +13,7 @@ echo "✅ New changes copied to server!"
 
 # Install dependencies (production only for speed/cleanliness)
 echo "📦 Installing Dependencies..."
-npm ci --only=production
+npm install
 
 # Create production build
 echo "🏗️ Creating Production Build..."
