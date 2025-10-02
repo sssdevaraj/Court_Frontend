@@ -1,25 +1,24 @@
-#!/bin/bash
-set -e
+name: Deploy
 
-echo "🚀 Deployment started..."
+on:
+  push:
+    branches:
+      - main
 
-APP_DIR="/root/Court_Frontend"
-WEB_DIR="/var/www/html"   # Nginx default root
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-cd $APP_DIR
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-echo "📥 Pulling latest code..."
-git pull origin main
-echo "✅ New changes copied to server!"
-
-echo "📦 Installing dependencies..."
-npm install --yes
-
-echo "🏗️ Creating production build..."
-npm run build
-
-echo "📂 Deploying build to web directory..."
-rm -rf $WEB_DIR/*
-cp -r dist/* $WEB_DIR/
-
-echo "✅ Deployment finished successfully!"
+      - name: Run deploy script on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            bash /root/Court_Frontend/deploy.sh
