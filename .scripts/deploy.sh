@@ -1,20 +1,28 @@
 #!/bin/bash
 set -e
 
-echo "Deployment started..."
+echo "🚀 Deployment started..."
 
-# Pull the latest version of the app
+APP_DIR="/root/Court_Frontend"
+WEB_DIR="/home/ecourtmsg/htdocs/court_front"
+
+cd $APP_DIR
+
+echo "📥 Pulling latest code..."
 git pull origin main
-echo "New changes copied to server !"
+echo "✅ New changes copied to server!"
 
-echo "Installing Dependencies..."
+echo "📦 Installing dependencies..."
 npm install --yes
 
-echo "Creating Production Build..."
-# For ReactJS VueJS and Nuxt JS
+echo "🏗️ Creating production build..."
+# For ReactJS / VueJS / Vite / Nuxt
 npm run build
-
 # For NextJS
 # npm run export
 
-echo "Deployment Finished!"
+echo "📂 Deploying build to web directory..."
+rm -rf $WEB_DIR/*
+cp -r dist/* $WEB_DIR/
+
+echo "✅ Deployment finished successfully!"
