@@ -4,7 +4,7 @@ set -e
 echo "🚀 Deployment started..."
 
 APP_DIR="/root/Court_Frontend"
-WEB_DIR="/home/ecourtmsg/htdocs/court_front"
+WEB_DIR="/var/www/html"   # Nginx default root
 
 cd $APP_DIR
 
@@ -16,10 +16,7 @@ echo "📦 Installing dependencies..."
 npm install --yes
 
 echo "🏗️ Creating production build..."
-# For ReactJS / VueJS / Vite / Nuxt
 npm run build
-# For NextJS
-# npm run export
 
 echo "📂 Deploying build to web directory..."
 rm -rf $WEB_DIR/*
