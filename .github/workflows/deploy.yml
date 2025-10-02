@@ -17,5 +17,5 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /Court_Frontend
+            cd ~/Court_Frontend
             ./.scripts/deploy.sh
